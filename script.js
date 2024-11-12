@@ -1,7 +1,7 @@
 
 
 async function fetchData() { 
-    const response = await fetch('cereales.csv');
+    const response = await fetch('csv/cereales.csv');
     const data = await response.text();
 
     const rows = data.split('\n').slice(1);
@@ -168,7 +168,7 @@ fetchData().then(({ traces, annotations }) => {
 
 // Function to fetch and plot data for the nutritional chart in 'newDiv'
 async function fetchData1(cereal) {
-    const response = await fetch(`${cereal}.csv`);
+    const response = await fetch(`csv/${cereal}.csv`);
     const data = await response.text();
     const rows = data.split('\n').slice(1,8);
 
@@ -207,7 +207,7 @@ async function fetchData1(cereal) {
 
 // Function to fetch and plot sodium data for the sodium chart in 'SodioDiv'
 async function fetchSodio(cereal) {
-    const response = await fetch(`${cereal}.csv`);
+    const response = await fetch(`csv/${cereal}.csv`);
     const data = await response.text();
     const rows = data.split('\n').slice(8, 9);  // Select only the 9th line
 
@@ -246,11 +246,11 @@ async function fetchSodio(cereal) {
 
 // Import Tone.js library (make sure to include the Tone.js library in your HTML file)
 const audioFiles = {
-    Monoballs: 'Monoballs.mp3', 
-    ChocoKrispis: 'ChocoKrispis.mp3',
-    ColaCao: 'ColaCao.mp3', 
-    Trix: 'Trix.mp3', 
-    Chocapic: 'Chocapic.mp3'
+    Monoballs: 'mp3/Monoballs.mp3', 
+    ChocoKrispis: 'mp3/ChocoKrispis.mp3',
+    ColaCao: 'mp3/ColaCao.mp3', 
+    Trix: 'mp3/Trix.mp3', 
+    Chocapic: 'mp3/Chocapic.mp3'
 };
 
 // Load audio files into Tone.js Players
@@ -267,6 +267,17 @@ function setVolume(cereal, volume) {
     }
 }
 
+// Function to handle keyboard events
+document.addEventListener("keydown", (event) => {
+    // Find the box element with the matching data-key attribute
+    const box = document.querySelector(`.box[data-key="${event.key}"]`);
+    if (box) {
+      // Trigger a click on the found box
+      box.querySelector("a").click();
+    }
+  });
+
+  
 // Event listener for image boxes to load new charts on click
 document.querySelectorAll('.image-boxes .box').forEach(box => {
     box.addEventListener('click', () => {
