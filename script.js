@@ -244,6 +244,54 @@ async function fetchSodio(cereal) {
     return { traces, annotations, cereal };
 }
 
+if ('serial' in navigator) {
+    const connectButton = document.getElementById('connectButton');
+    let port;
+
+    // Function to connect to the serial port
+    async function connectSerial() {
+        try {
+            port = await navigator.serial.requestPort();
+            await port.open({ baudRate: 9600 });
+
+            connectButton.innerText = 'Connected';
+            connectButton.disabled = true;
+
+            const textDecoder = new TextDecoderStream();
+            const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+            const reader = textDecoder.readable.getReader();
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) {
+                    reader.releaseLock();
+                    break;
+                }
+                if (value) {
+                    handleSerialData(value.trim());
+                }
+            }
+        } catch (error) {
+            console.error('Error connecting to serial port:', error);
+        }
+    }
+
+    // Function to handle incoming serial data and trigger box clicks
+    function handleSerialData(data) {
+        const box = document.querySelector(`.box[data-key="${data}"]`);
+        if (box) {
+            box.querySelector("a").click();
+            console.log(`Simulated click on cereal box with key: ${data}`);
+        } else {
+            console.log(`No box found for key: ${data}`);
+        }
+    }
+
+    connectButton.addEventListener('click', connectSerial);
+} else {
+    console.log('Web Serial API is not supported in this browser.');
+}
+
 // Import Tone.js library (make sure to include the Tone.js library in your HTML file)
 const audioFiles = {
     Monoballs: 'mp3/Monoballs.mp3', 
