@@ -13,7 +13,7 @@ def count_rotations():
         return
 
     # Enable motion sensing
-    wii.rpt_mode = cwiid.RPT_MOTION | cwiid.RPT_BTN
+    wii.rpt_mode = cwiid.RPT_MOTIONPLUS | cwiid.RPT_BTN
 
     # Initialize variables for rotation counting
     rotation_count = 0
