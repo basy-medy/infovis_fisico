@@ -12,8 +12,15 @@ def count_rotations():
         print("Failed to connect to the Wii Remote. Please try again.")
         return
 
-    # Enable motion sensing
-    wii.rpt_mode = cwiid.RPT_MOTIONPLUS | cwiid.RPT_BTN
+    # Enable accelerometer, buttons, and MotionPlus if available
+    wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC | cwiid.RPT_EXT
+
+    # Check if MotionPlus is present
+    if 'ext_type' in wii.state and wii.state['ext_type'] == cwiid.EXT_MOTIONPLUS:
+        wii.enable(cwiid.FLAG_MOTIONPLUS)
+        print("Wii MotionPlus enabled.")
+    else:
+        print("MotionPlus not detected. Proceeding with accelerometer data only.")
 
     # Initialize variables for rotation counting
     rotation_count = 0
@@ -23,21 +30,26 @@ def count_rotations():
     try:
         print("Counting rotations... Press 'Home' button on Wii Remote to quit.")
         while True:
-            # Read the acceleration data (x, y, z)
-            accel = wii.state['acc']
-            ax, ay, az = accel
+            if 'acc' in wii.state:
+                # Use accelerometer data (x, y, z)
+                ax, ay, az = wii.state['acc']
+                angle = math.degrees(math.atan2(ay, az))
 
-            # Calculate roll angle from acceleration data
-            angle = math.degrees(math.atan2(ay, az))
+                if last_angle is not None:
+                    # Detect rotation from the angle change
+                    angle_diff = abs(angle - last_angle)
+                    if angle_diff > rotation_threshold:
+                        rotation_count += 1
+                        print(f"Rotation detected! Total rotations: {rotation_count}")
 
-            if last_angle is not None:
-                # Check if there's a significant change in angle, indicating a rotation
-                angle_diff = abs(angle - last_angle)
-                if angle_diff > rotation_threshold:
-                    rotation_count += 1
-                    print(f"Rotation detected! Total rotations: {rotation_count}")
+                last_angle = angle
 
-            last_angle = angle
+            # If MotionPlus is active, use gyroscope data for finer rotation detection
+            if 'motionplus' in wii.state:
+                gyro = wii.state['motionplus']
+                # Process the gyroscope data as needed (e.g., check rotation speed)
+                # Here, you could implement more precise counting based on gyroscope rotation
+                # Note: gyro['x'], gyro['y'], and gyro['z'] give rotation rates along each axis.
 
             # Exit if the Home button is pressed
             if wii.state['buttons'] & cwiid.BTN_HOME:
