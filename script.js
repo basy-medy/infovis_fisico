@@ -78,7 +78,7 @@ fetchData().then(({ traces, annotations }) => {
             range: [0, 15],
             showticklabels: false
         },
-        showlegend: false,
+        showlegend: true,
         margin: { l: 70, r: 100, t: 130 },
         annotations: [
             ...annotations,
