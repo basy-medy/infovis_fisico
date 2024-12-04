@@ -303,7 +303,7 @@ fetchData().then(({ traces, annotations }) => {
             range: [0, 15],
             showticklabels: false
         },
-        showlegend: false,
+        showlegend: true,
         margin: { l: 70, r: 100, t: 130 },
         annotations: [
             ...annotations,
@@ -525,7 +525,7 @@ document.querySelectorAll('.image-boxes .box').forEach(box => {
                 title: `Datos Nutricionales de ${cereal}`,
                 xaxis: { tickvals: ['2010', '2012', '2015', '2016', '2024'], tickmode: 'array' },
                 yaxis: { range: [0, 26], showticklabels: false },
-                showlegend: false,
+                showlegend: true,
                 margin: { l: 70, r: 100, t: 130 },
                 annotations: [
                     ...annotations,
@@ -577,7 +577,7 @@ document.querySelectorAll('.image-boxes .box').forEach(box => {
                 title: `Datos Sodio[mg] de ${cereal}`,
                 xaxis: { tickvals: ['2010', '2012', '2015', '2016', '2024'], tickmode: 'array' },
                 yaxis: { range: [0, 145], showticklabels: false },
-                showlegend: false,
+                showlegend: true,
                 margin: { l: 70, r: 100, t: 130 },
                 annotations: [
                     ...annotations,
