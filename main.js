@@ -1,7 +1,232 @@
+import "https://cdn.plot.ly/plotly-2.34.0.min.js";
+import "https://cdnjs.cloudflare.com/ajax/libs/tone/15.1.3/Tone.min.js";
+import CameraMovement from './js/cameraMovement.js';
+
+import Protobject from './js/protobject.js';
+
+const styles = `
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 200px; /* Adjust this value as needed */
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 150px;
+    height: auto;
+    margin-right: 20px;
+}
+
+.text {
+    max-width: 600px;
+    background-color: rgba(255, 255, 255, 0.8); /* White background with 80% opacity */
+    padding: 15px; /* Add padding for spacing inside the box */
+    border-radius: 10px; /* Optional: rounded corners */
+}
+
+.chart-container {
+    display: flex;
+    align-items: center;
+}
+
+.chart-text {
+    max-width: 300px; /* Adjust width as needed */
+    margin-right: 20px; /* Space between text and chart */
+    text-align: left; /* Align text to the left */
+}
+
+.additional-image {
+    max-width: 100%; /* Responsive image */
+    height: auto; /* Maintain aspect ratio */
+    margin-top: 10px; /* Add some space above the image */
+}
+
+#myDiv {
+    width: 700px;
+    height: 700px;
+}
+
+#newDiv {
+    width: 700px;
+    height: 700px;
+}
+
+#SodioDiv {
+    width: 700px;
+    height: 700px;
+}
+
+.image-boxes {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+  }
+  
+  .box {
+    flex: 1;
+    max-width: 100px; /* Set the max width of each box */
+    text-align: center;
+  }
+  
+  .box img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    transition: transform 0.3s;
+  }
+  
+  .box img:hover {
+    transform: scale(1.05);
+  }   
+  body {
+      padding-top: 100px; /* Adjust this value as needed */
+    }
+    
+.counter-container {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+    `
+
+const styleElement = document.createElement('style');
+styleElement.innerHTML = styles;
+document.head.appendChild(styleElement);
+
+document.body.insertAdjacentHTML('beforeend', `
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/sello.png" alt="Logo" class="logo">
+      <div class="text">
+        <p>
+          En el año 2012 fue aprobada la <a href="https://www.bcn.cl/leychile/navegar?idNorma=1041570"><b>Ley de sellos (N° 20606)</b></a>, que tenía como principal objetivo fomentar los habitos saludables en Chile mediante un etiquetado claro y sencillo. Específicamente los cereales, modificaron sus fórmulas,
+          reduciendo principalmente la cantidad de azúcares por porción.
+        </p>
+      </div>
+    </div>
+
+    <!-- New Section for Image Boxes with Links -->
+    <div class="image-boxes">
+      <div class="box" data-cereal="default">
+        <a href="javascript:void(0)">
+          <img src="https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/cereals.png" alt="Image 1">
+        </a>
+      </div>
+      <div class="box" data-cereal="Monoballs">
+        <a href="javascript:void(0)">
+          <img src="https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/Monoballs.png" alt="Image 2">
+        </a>
+      </div>
+      <div class="box" data-cereal="ChocoKrispis">
+        <a href="javascript:void(0)">
+          <img src="https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/Choco krispis.png" alt="Image 3">
+        </a>
+      </div>
+      <div class="box" data-cereal="ColaCao">
+        <a href="javascript:void(0)">
+          <img src="https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/Cola Cao.png" alt="Image 4">
+        </a>
+      </div>
+      <div class="box" data-cereal="Trix">
+        <a href="javascript:void(0)">
+          <img src="https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/Trix.png" alt="Image 5">
+        </a>
+      </div>
+      <div class="box" data-cereal="Chocapic">
+        <a href="javascript:void(0)">
+          <img src="https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/Chocapic.png" alt="Image 6">
+        </a>
+      </div>
+    </div>
+
+    <div class="text">
+        <li>
+          Has click en los logos de los cereales para ver datos sobre sus valores nutricionales a través de los años.
+        </li>
+        <li>
+          Has click en el cereal genérico para volver al gráfico de azúcares por cereal.
+        </li>
+    </div>
+
+    <div class="chart-container">
+      <div id="myDiv" class="chart-box"></div> <!-- Initially visible -->
+      <div id="newDiv" class="chart-box" style="display: none;"></div> <!-- Initially hidden -->
+      <div id="SodioDiv" class="chart-box" style="display: none;"></div> <!-- Initially hidden -->
+  	
+     <div class="counter-container">
+       <p>¡Cuidado! Estarías consumiendo:</p>
+       <div class="counter" id="counter">0</div>
+       <p>gramos de azúcar en esta ración</p>
+    </div>
+    </div>
+  </div>`
+          )
+let counter = 0;
+
+setInterval(() => {
+    if (counter > 0) {
+        const message = `Cuidado! Estarías consumiendo ${counter} gramos de azúcar en esta ración `;
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'es'; // Set language to Spanish
+        window.speechSynthesis.speak(utterance);
+
+        utterance.onend = () => {
+            counter = 0;
+            document.getElementById('counter').textContent = counter;
+        };
+    } else {
+        counter = 0;
+        document.getElementById('counter').textContent = counter;
+    }
+}, 20000);
+
+Protobject.onReceived((data) => {
+    console.log(data.key);
+    if (data.key >= 8) {
+        // Adding a delay of 1 second (1000 milliseconds) before incrementing the counter
+        setTimeout(() => {
+            counter++;
+            document.getElementById('counter').textContent = Math.round(counter * 0.8);
+        }, 1000); // Delay in milliseconds
+    } else {
+        // Update the counter without a delay
+        document.getElementById('counter').textContent = counter;
+    }
+});
 
 
 async function fetchData() { 
-    const response = await fetch('csv/cereales.csv');
+    const response = await fetch('https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/cereales.csv');
     const data = await response.text();
 
     const rows = data.split('\n').slice(1);
@@ -78,7 +303,7 @@ fetchData().then(({ traces, annotations }) => {
             range: [0, 15],
             showticklabels: false
         },
-        showlegend: true,
+        showlegend: false,
         margin: { l: 70, r: 100, t: 130 },
         annotations: [
             ...annotations,
@@ -168,7 +393,7 @@ fetchData().then(({ traces, annotations }) => {
 
 // Function to fetch and plot data for the nutritional chart in 'newDiv'
 async function fetchData1(cereal) {
-    const response = await fetch(`csv/${cereal}.csv`);
+    const response = await fetch(`https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/${cereal}.csv`);
     const data = await response.text();
     const rows = data.split('\n').slice(1,8);
 
@@ -207,7 +432,7 @@ async function fetchData1(cereal) {
 
 // Function to fetch and plot sodium data for the sodium chart in 'SodioDiv'
 async function fetchSodio(cereal) {
-    const response = await fetch(`csv/${cereal}.csv`);
+    const response = await fetch(`https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/${cereal}.csv`);
     const data = await response.text();
     const rows = data.split('\n').slice(8, 9);  // Select only the 9th line
 
@@ -244,61 +469,13 @@ async function fetchSodio(cereal) {
     return { traces, annotations, cereal };
 }
 
-if ('serial' in navigator) {
-    const connectButton = document.getElementById('connectButton');
-    let port;
-
-    // Function to connect to the serial port
-    async function connectSerial() {
-        try {
-            port = await navigator.serial.requestPort();
-            await port.open({ baudRate: 9600 });
-
-            connectButton.innerText = 'Connected';
-            connectButton.disabled = true;
-
-            const textDecoder = new TextDecoderStream();
-            const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
-            const reader = textDecoder.readable.getReader();
-
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) {
-                    reader.releaseLock();
-                    break;
-                }
-                if (value) {
-                    handleSerialData(value.trim());
-                }
-            }
-        } catch (error) {
-            console.error('Error connecting to serial port:', error);
-        }
-    }
-
-    // Function to handle incoming serial data and trigger box clicks
-    function handleSerialData(data) {
-        const box = document.querySelector(`.box[data-key="${data}"]`);
-        if (box) {
-            box.querySelector("a").click();
-            console.log(`Simulated click on cereal box with key: ${data}`);
-        } else {
-            console.log(`No box found for key: ${data}`);
-        }
-    }
-
-    connectButton.addEventListener('click', connectSerial);
-} else {
-    console.log('Web Serial API is not supported in this browser.');
-}
-
 // Import Tone.js library (make sure to include the Tone.js library in your HTML file)
 const audioFiles = {
-    Monoballs: 'mp3/Monoballs.mp3', 
-    ChocoKrispis: 'mp3/ChocoKrispis.mp3',
-    ColaCao: 'mp3/ColaCao.mp3', 
-    Trix: 'mp3/Trix.mp3', 
-    Chocapic: 'mp3/Chocapic.mp3'
+    Monoballs: 'https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/Monoballs.mp3', 
+    ChocoKrispis: 'https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/ChocoKrispis.mp3',
+    ColaCao: 'https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/ColaCao.mp3', 
+    Trix: 'https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/Trix.mp3', 
+    Chocapic: 'https://raw.githubusercontent.com/basy-medy/proyecto_infovis/main/Chocapic.mp3'
 };
 
 // Load audio files into Tone.js Players
@@ -315,17 +492,6 @@ function setVolume(cereal, volume) {
     }
 }
 
-// Function to handle keyboard events
-document.addEventListener("keydown", (event) => {
-    // Find the box element with the matching data-key attribute
-    const box = document.querySelector(`.box[data-key="${event.key}"]`);
-    if (box) {
-      // Trigger a click on the found box
-      box.querySelector("a").click();
-    }
-  });
-
-  
 // Event listener for image boxes to load new charts on click
 document.querySelectorAll('.image-boxes .box').forEach(box => {
     box.addEventListener('click', () => {
@@ -458,5 +624,3 @@ document.querySelectorAll('.image-boxes .box').forEach(box => {
         });
     });
 });
-
-
